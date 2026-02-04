@@ -6,7 +6,14 @@
     "backend"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace=frontend & npm run start:dev --workspace=backend",
-    "build": "npm run build --workspace=frontend && npm run build --workspace=backend"
+    "dev": "concurrently \"npm run dev --workspace=frontend\" \"npm run start:dev --workspace=backend\"",
+    "build": "npm run build --workspace=frontend && npm run build --workspace=backend",
+    "studio": "npm run prisma:studio --workspace=backend",
+    "db:up": "npm run db:up --workspace=backend",
+    "db:down": "npm run db:down --workspace=backend",
+    "db:restart": "npm run db:restart --workspace=backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }
