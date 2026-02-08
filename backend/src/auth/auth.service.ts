@@ -11,13 +11,29 @@ import { hashPassword } from 'src/common/utils/hashPassword.util';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { AuthTokenPayload } from './interfaces/auth.interface';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
+
+  private async generateTokens(payload: AuthTokenPayload) {
+    const accessToken = await this.jwtService.signAsync(payload, {
+      secret: this.configService.get('JWT_ACCESS_SECRET'),
+      expiresIn: '1h',
+    });
+
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      secret: this.configService.get('JWT_REFRESH_SECRET'),
+      expiresIn: '7d',
+    });
+
+    return { accessToken, refreshToken };
+  }
 
   async signIn({ email, password }: SignInDto) {
     const user = await this.userService.findOneByEmail(email);
@@ -33,9 +49,15 @@ export class AuthService {
 
     const payload: AuthTokenPayload = { id: user.id, email: user.email };
 
+    const tokens = await this.generateTokens(payload);
+
     return {
-      access_token: await this.jwtService.signAsync(payload),
-      email: email,
+      tokens,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
     };
   }
 
@@ -53,5 +75,25 @@ export class AuthService {
         name,
       });
     return result;
+  }
+
+  async refreshTokens(refreshToken: string) {
+    try {
+      const payload = await this.jwtService.verifyAsync<AuthTokenPayload>(
+        refreshToken,
+        {
+          secret: this.configService.get('JWT_REFRESH_SECRET'),
+        },
+      );
+
+      const { accessToken } = await this.generateTokens({
+        id: payload.id,
+        email: payload.email,
+      });
+
+      return { accessToken };
+    } catch {
+      throw new UnauthorizedException();
+    }
   }
 }
