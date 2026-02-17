@@ -17,7 +17,14 @@ export class UserService {
   findOne(id: string) {
     return this.prisma.user.findUnique({
       where: { id },
-      select: { id: true, name: true, email: true, avatar: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        avatar: true,
+        tags: true,
+        goal: true,
+      },
     });
   }
 
