@@ -5,6 +5,19 @@ CREATE TYPE "FocusSeccionType" AS ENUM ('SESSION', 'POMODORO');
 CREATE TYPE "FocusSeccionStatus" AS ENUM ('RUNNING', 'PAUSED', 'FINISHED');
 
 -- CreateTable
+CREATE TABLE "User" (
+    "id" UUID NOT NULL,
+    "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "name" TEXT,
+    "avatar" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Tag" (
     "id" UUID NOT NULL,
     "user_id" UUID NOT NULL,
@@ -23,8 +36,9 @@ CREATE TABLE "SessionPreset" (
     "user_id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "type" "FocusSeccionType" NOT NULL DEFAULT 'SESSION',
-    "duration" TEXT,
-    "rest_duration" TEXT,
+    "duration" INTEGER NOT NULL,
+    "cycles" INTEGER,
+    "rest_duration" INTEGER,
     "animation" TEXT,
     "end_sound" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -37,8 +51,8 @@ CREATE TABLE "SessionPreset" (
 CREATE TABLE "FocusSession" (
     "id" UUID NOT NULL,
     "user_id" UUID NOT NULL,
-    "preset_id" UUID NOT NULL,
-    "tag_id" UUID NOT NULL,
+    "preset_id" UUID,
+    "tag_id" UUID,
     "started_at" TIMESTAMP(3) NOT NULL,
     "finished_at" TIMESTAMP(3),
     "status" "FocusSeccionStatus" NOT NULL,
@@ -59,6 +73,9 @@ CREATE TABLE "Goal" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Goal_user_id_key" ON "Goal"("user_id");
 
 -- AddForeignKey
@@ -71,10 +88,10 @@ ALTER TABLE "SessionPreset" ADD CONSTRAINT "SessionPreset_user_id_fkey" FOREIGN 
 ALTER TABLE "FocusSession" ADD CONSTRAINT "FocusSession_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "FocusSession" ADD CONSTRAINT "FocusSession_preset_id_fkey" FOREIGN KEY ("preset_id") REFERENCES "SessionPreset"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "FocusSession" ADD CONSTRAINT "FocusSession_preset_id_fkey" FOREIGN KEY ("preset_id") REFERENCES "SessionPreset"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "FocusSession" ADD CONSTRAINT "FocusSession_tag_id_fkey" FOREIGN KEY ("tag_id") REFERENCES "Tag"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "FocusSession" ADD CONSTRAINT "FocusSession_tag_id_fkey" FOREIGN KEY ("tag_id") REFERENCES "Tag"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Goal" ADD CONSTRAINT "Goal_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

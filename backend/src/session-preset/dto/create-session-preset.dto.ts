@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEnum } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsNumber, Min } from 'class-validator';
 import { FocusSeccionType } from 'generated/prisma/enums';
 
 export class CreateSessionPresetDto {
@@ -10,12 +10,19 @@ export class CreateSessionPresetDto {
   type?: FocusSeccionType;
 
   @IsOptional()
-  @IsString()
-  duration?: string;
+  @IsNumber()
+  @Min(1)
+  duration: number;
 
   @IsOptional()
-  @IsString()
-  rest_duration?: string;
+  @IsNumber()
+  @Min(1)
+  cycles?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  rest_duration?: number;
 
   @IsOptional()
   @IsString()

@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { SessionPresetModule } from './session-preset/session-preset.module';
+import { FocusSessionModule } from './focus-session/focus-session.module';
 
 @Module({
   controllers: [AppController],
@@ -23,6 +24,7 @@ import { SessionPresetModule } from './session-preset/session-preset.module';
     AuthModule,
     PrismaModule,
     SessionPresetModule,
+    FocusSessionModule,
   ],
   exports: [PrismaService],
 })

@@ -8,7 +8,10 @@ export class SessionPresetService {
   constructor(private prisma: PrismaService) {}
   async create(userId: string, createSessionPresetDto: CreateSessionPresetDto) {
     return await this.prisma.sessionPreset.create({
-      data: { ...createSessionPresetDto, user_id: userId },
+      data: {
+        ...createSessionPresetDto,
+        user: { connect: { id: userId } },
+      },
     });
   }
 
