@@ -8,6 +8,7 @@ import { TagModule } from './tag/tag.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
+import { SessionPresetModule } from './session-preset/session-preset.module';
 
 @Module({
   controllers: [AppController],
@@ -21,6 +22,7 @@ import { ConfigModule } from '@nestjs/config';
     TagModule,
     AuthModule,
     PrismaModule,
+    SessionPresetModule,
   ],
   exports: [PrismaService],
 })
