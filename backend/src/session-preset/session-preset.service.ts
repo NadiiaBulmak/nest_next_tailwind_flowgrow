@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSessionPresetDto } from './dto/create-session-preset.dto';
 import { UpdateSessionPresetDto } from './dto/update-session-preset.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -22,17 +22,31 @@ export class SessionPresetService {
   }
 
   async findOne(id: string) {
-    return await this.prisma.sessionPreset.findUnique({ where: { id } });
+    const sessionPreset = await this.prisma.sessionPreset.findUnique({
+      where: { id },
+    });
+
+    if (!sessionPreset) {
+      throw new NotFoundException('Session-preset is not found');
+    }
+
+    return sessionPreset;
   }
 
   async update(id: string, updateSessionPresetDto: UpdateSessionPresetDto) {
-    return await this.prisma.sessionPreset.update({
-      where: { id },
-      data: { ...updateSessionPresetDto },
-    });
+    const isSessionPresetExist = await this.findOne(id);
+    return isSessionPresetExist
+      ? await this.prisma.sessionPreset.update({
+          where: { id },
+          data: { ...updateSessionPresetDto },
+        })
+      : null;
   }
 
   async remove(id: string) {
-    return await this.prisma.sessionPreset.delete({ where: { id } });
+    const isSessionPresetExist = await this.findOne(id);
+    return isSessionPresetExist
+      ? !!(await this.prisma.sessionPreset.delete({ where: { id } }))
+      : false;
   }
 }

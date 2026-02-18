@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateFocusSessionDto } from './dto/create-focus-session.dto';
 import { UpdateFocusSessionDto } from './dto/update-focus-session.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -18,9 +18,15 @@ export class FocusSessionService {
 
     return await this.prisma.focusSession.create({
       data: {
-        ...createFocusSessionDto,
-        user_id: userId,
-        preset_id: presetId,
+        user: { connect: { id: userId } },
+        preset: { connect: { id: presetId } },
+        tag: createFocusSessionDto.tag_id
+          ? { connect: { id: createFocusSessionDto.tag_id } }
+          : undefined,
+        started_at: createFocusSessionDto.started_at,
+        finished_at: createFocusSessionDto.finished_at,
+        status: createFocusSessionDto.status,
+        actual_duration_seconds: createFocusSessionDto.actual_duration_seconds,
       },
       include: {
         preset: true,
@@ -44,17 +50,31 @@ export class FocusSessionService {
   }
 
   async findOne(id: string) {
-    return await this.prisma.focusSession.findUnique({ where: { id } });
+    const focusSession = await this.prisma.focusSession.findUnique({
+      where: { id },
+    });
+
+    if (!focusSession) {
+      throw new NotFoundException('Focus-session is not found');
+    }
+
+    return focusSession;
   }
 
   async update(id: string, updateFocusSessionDto: UpdateFocusSessionDto) {
-    return await this.prisma.focusSession.update({
-      where: { id },
-      data: { ...updateFocusSessionDto },
-    });
+    const focusSession = await this.findOne(id);
+    return focusSession
+      ? await this.prisma.focusSession.update({
+          where: { id },
+          data: { ...updateFocusSessionDto },
+        })
+      : null;
   }
 
   async remove(id: string) {
-    return await this.prisma.focusSession.delete({ where: { id } });
+    const focusSession = await this.findOne(id);
+    return focusSession
+      ? !!(await this.prisma.focusSession.delete({ where: { id } }))
+      : false;
   }
 }

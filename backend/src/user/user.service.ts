@@ -14,7 +14,7 @@ export class UserService {
     return this.prisma.user.findMany();
   }
 
-  findOne(id: string) {
+  findOne(id: string, extended: boolean) {
     return this.prisma.user.findUnique({
       where: { id },
       select: {
@@ -22,8 +22,8 @@ export class UserService {
         name: true,
         email: true,
         avatar: true,
-        tags: true,
-        goal: true,
+        goal: extended,
+        tags: extended,
       },
     });
   }
@@ -45,6 +45,12 @@ export class UserService {
       where: { id },
       data: {
         ...updateUserDto,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        avatar: true,
       },
     });
   }

@@ -33,6 +33,7 @@ export class CreateFocusSessionDto {
   @IsEnum(FocusSeccionStatus)
   status: FocusSeccionStatus;
 
+  @IsOptional()
   @IsNumber()
-  actual_duration_seconds: number;
+  actual_duration_seconds?: number;
 }

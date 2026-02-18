@@ -82,7 +82,7 @@ model FocusSession {
   started_at            DateTime
   finished_at           DateTime?
   status                FocusSeccionStatus
-  actual_duration_seconds       Int
+  actual_duration_seconds       Int?
 }
 
 model Goal {

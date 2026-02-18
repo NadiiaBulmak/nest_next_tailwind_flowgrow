@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateTagDto } from './dto/update-tag.dto';
@@ -16,19 +16,42 @@ export class TagService {
   }
 
   async findAll(userId: string) {
-    return await this.prisma.tag.findMany({ where: { user_id: userId } });
+    return await this.prisma.tag.findMany({
+      where: { user_id: userId },
+      select: {
+        id: true,
+        name: true,
+        color: true,
+        description: true,
+      },
+    });
   }
 
   async findOne(id: string) {
-    return await this.prisma.tag.findUnique({ where: { id } });
-    return `This action returns a #${id} tag`;
+    const tag = await this.prisma.tag.findUnique({
+      where: { id },
+    });
+
+    if (!tag) {
+      throw new NotFoundException('Tag does not exist');
+    }
+
+    return tag;
   }
 
   async update(id: string, dto: UpdateTagDto) {
-    return await this.prisma.tag.update({ where: { id }, data: { ...dto } });
+    const isTagExist = await this.findOne(id);
+
+    return isTagExist
+      ? await this.prisma.tag.update({ where: { id }, data: { ...dto } })
+      : null;
   }
 
   async remove(id: string) {
-    return await this.prisma.tag.delete({ where: { id } });
+    const isTagExist = await this.findOne(id);
+
+    return isTagExist
+      ? !!(await this.prisma.tag.delete({ where: { id } }))
+      : false;
   }
 }

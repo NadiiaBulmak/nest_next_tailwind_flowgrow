@@ -74,6 +74,7 @@ export class AuthService {
         password: await hashPassword(password),
         name,
       });
+
     return result;
   }
 
@@ -91,7 +92,7 @@ export class AuthService {
         email: payload.email,
       });
 
-      return { accessToken };
+      return { accessToken, refreshToken };
     } catch {
       throw new UnauthorizedException();
     }
